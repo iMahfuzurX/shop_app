@@ -2,7 +2,6 @@
 // Created by iMahfuzurX on 1/23/2023.
 //
 import 'package:flutter/material.dart';
-import 'package:shop_app/providers/products_provider.dart';
 
 class Product with ChangeNotifier {
   final String id;
@@ -12,16 +11,16 @@ class Product with ChangeNotifier {
   final String imageUrl;
   bool isFavorite;
 
-  Product({required this.id,
-    required this.title,
-    required this.description,
-    required this.price,
-    required this.imageUrl,
-    this.isFavorite = false});
+  Product(
+      {required this.id,
+      required this.title,
+      required this.description,
+      required this.price,
+      required this.imageUrl,
+      this.isFavorite = false});
 
   void toggleFavorite() {
     isFavorite = !isFavorite;
     notifyListeners();
-    ProductsProvider().notifyListeners();
   }
 }
