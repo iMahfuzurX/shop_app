@@ -28,7 +28,15 @@ class ProductItem extends StatelessWidget {
         title: Text(product.title),
         trailing: IconButton(
           onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
             cart.addItem(product.id, product.price, product.title);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Item added to cart'),
+              duration: Duration(seconds: 3),
+              action: SnackBarAction(label: 'UNDO', onPressed: () {
+                cart.removeSingleItem(product.id);
+              }),
+            ));
           },
           icon: const Icon(Icons.shopping_cart),
           color: Colors.red,
@@ -37,8 +45,9 @@ class ProductItem extends StatelessWidget {
       child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: GestureDetector(
-            onTap: () => Navigator.of(context)
-                .pushNamed(ProductsDetailScreen.routeName, arguments: product.id),
+            onTap: () => Navigator.of(context).pushNamed(
+                ProductsDetailScreen.routeName,
+                arguments: product.id),
             child: Image.network(
               product.imageUrl,
               fit: BoxFit.cover,
