@@ -28,8 +28,8 @@ class ProductItem extends StatelessWidget {
         title: Text(product.title),
         trailing: IconButton(
           onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
             cart.addItem(product.id, product.price, product.title);
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Item added to cart'),
               duration: Duration(seconds: 3),

@@ -9,8 +9,8 @@ import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/screens/orderpage_screen.dart';
 import 'package:shop_app/widgets/app_drawer.dart';
+import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/products_grid.dart';
-import '../widgets/badge.dart';
 
 enum FilterOptions { Favourite, All }
 
@@ -48,7 +48,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                     ),
                   ]),
           Consumer<CartProvider>(
-            builder: (ctx, cart, child) => Badge(
+            builder: (ctx, cart, child) => CartBadge(
                 child: child as Widget,
                 value: '${cart.itemCount}',
                 color: Theme.of(context).colorScheme.secondary),

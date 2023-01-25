@@ -2,6 +2,7 @@
 // Created by iMahfuzurX on 1/24/2023.
 //
 import 'package:flutter/material.dart';
+import 'package:shop_app/screens/manage_product_screen.dart';
 import 'package:shop_app/screens/orderpage_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -36,6 +37,17 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(OrderPageScreen.routeName);
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: CircleAvatar(
+              child: Icon(Icons.edit),
+            ),
+            title: Text('Manage Products'),
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(ManageProductScreen.routeName);
             },
           ),
           Divider(),
