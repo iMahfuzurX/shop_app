@@ -1,8 +1,10 @@
 //
 // Created by iMahfuzurX on 1/23/2023.
 //
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'product_provider.dart';
+import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
   final List<Product> _productsList = [
@@ -38,46 +40,6 @@ class ProductsProvider with ChangeNotifier {
       imageUrl:
           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     ),
-    Product(
-      id: 'p5',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
-    Product(
-      id: 'p6',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
-    Product(
-      id: 'p7',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
-    Product(
-      id: 'p8',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
-    Product(
-      id: 'p9',
-      title: 'A New Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
   ];
 
   final List<String> _favIds = [];
@@ -90,8 +52,40 @@ class ProductsProvider with ChangeNotifier {
     return [..._favIds];
   }
 
-  void addProduct(Product product) {
-    _productsList.add(product);
+  Future<void> addProduct(Product product) {
+    final Uri uri = Uri.https('shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app', 'products.json');
+    return http
+        .post(uri,
+            body: json.encode({
+              'title': product.title,
+              'description': product.description,
+              'price': product.price,
+              'imageUrl': product.imageUrl,
+              'isFavorite': product.isFavorite,
+            }))
+        .then((response) {
+      final Product newProduct = Product(
+          id: json.decode(response.body)['name'],
+          title: product.title,
+          description: product.description,
+          price: product.price,
+          imageUrl: product.imageUrl);
+      _productsList.add(newProduct);
+      notifyListeners();
+    }).catchError((error) {
+      print('erroroccured ${error.toString()}');
+      throw error;
+    });
+  }
+
+  void updateProduct(String id, Product product) {
+    final i = _productsList.indexWhere((element) => element.id == id);
+    _productsList[i] = product;
+    notifyListeners();
+  }
+
+  void deleteProduct(String id) {
+    _productsList.removeWhere((element) => element.id == id);
     notifyListeners();
   }
 

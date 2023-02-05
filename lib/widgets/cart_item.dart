@@ -50,7 +50,7 @@ class CartItem extends StatelessWidget {
       },
       background: Container(
         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        color: Theme.of(context).errorColor,
+        color: Theme.of(context).colorScheme.error,
         child: Icon(
           Icons.delete,
           color: Colors.white,

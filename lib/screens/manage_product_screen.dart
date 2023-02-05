@@ -4,11 +4,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/products_provider.dart';
+import 'package:shop_app/screens/edit_product_screen.dart';
 import 'package:shop_app/widgets/app_drawer.dart';
 import 'package:shop_app/widgets/manage_products_item.dart';
 
 class ManageProductScreen extends StatelessWidget {
   static final String routeName = '/manage-products';
+
   const ManageProductScreen({Key? key}) : super(key: key);
 
   @override
@@ -17,6 +19,13 @@ class ManageProductScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Manage Products'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(EditProductScreen.routeName);
+              },
+              icon: Icon(Icons.add)),
+        ],
       ),
       drawer: AppDrawer(),
       body: Padding(
@@ -25,6 +34,7 @@ class ManageProductScreen extends StatelessWidget {
           itemBuilder: (ctx, i) => Column(
             children: [
               ManageProductItem(
+                  id: productsData.productsList[i].id,
                   title: productsData.productsList[i].title,
                   imageUrl: productsData.productsList[i].imageUrl),
               Divider(),
