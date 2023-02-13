@@ -3,6 +3,7 @@
 //
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shop_app/models/http_exception.dart';
 import 'product_provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -131,10 +132,28 @@ class ProductsProvider with ChangeNotifier {
     final Uri uri = Uri.https(
         'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
         'products/$id.json');
+    final existingProdIndex =
+        _productsList.indexWhere((element) => element.id == id);
+    Product? existingProduct = _productsList[existingProdIndex];
+    _productsList.removeAt(existingProdIndex);
+    notifyListeners();
+    final response = await http.delete(uri);
+    if (response.statusCode >= 400) {
+      _productsList.insert(existingProdIndex, existingProduct as Product);
+      notifyListeners();
+      throw HttpException('Could not delete product');
+    }
+    existingProduct = null;
+  }
+
+  /*Future<void> deleteProduct(String id) async {
+    final Uri uri = Uri.https(
+        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'products/$id.json');
     await http.delete(uri);
     _productsList.removeWhere((element) => element.id == id);
     notifyListeners();
-  }
+  }*/
 
   void addFavs(String id) {
     _favIds.add(id);

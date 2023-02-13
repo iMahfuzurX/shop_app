@@ -12,6 +12,7 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<CartProvider>(context, listen: false);
     return GridTile(
@@ -19,7 +20,14 @@ class ProductItem extends StatelessWidget {
         backgroundColor: Colors.black87,
         leading: Consumer<Product>(
             builder: ((context, product, child) => IconButton(
-                  onPressed: () => product.toggleFavorite(),
+                  onPressed: () async {
+                    try {
+                      await product.toggleFavorite();
+                    } catch (error) {
+                      scaffold.showSnackBar(
+                          SnackBar(content: Text(error.toString())));
+                    }
+                  },
                   icon: Icon(product.isFavorite
                       ? Icons.favorite
                       : Icons.favorite_border),
@@ -33,9 +41,11 @@ class ProductItem extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Item added to cart'),
               duration: Duration(seconds: 3),
-              action: SnackBarAction(label: 'UNDO', onPressed: () {
-                cart.removeSingleItem(product.id);
-              }),
+              action: SnackBarAction(
+                  label: 'UNDO',
+                  onPressed: () {
+                    cart.removeSingleItem(product.id);
+                  }),
             ));
           },
           icon: const Icon(Icons.shopping_cart),
