@@ -105,13 +105,33 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product product) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final i = _productsList.indexWhere((element) => element.id == id);
-    _productsList[i] = product;
-    notifyListeners();
+    if (i >= 0) {
+      try {
+        final Uri uri = Uri.https(
+            'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
+            'products/$id.json');
+        await http.patch(uri,
+            body: json.encode({
+              'title': newProduct.title,
+              'description': newProduct.description,
+              'price': newProduct.price,
+              'imageUrl': newProduct.imageUrl,
+            }));
+        _productsList[i] = newProduct;
+        notifyListeners();
+      } catch (error) {
+        throw error;
+      }
+    }
   }
 
-  void deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async {
+    final Uri uri = Uri.https(
+        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'products/$id.json');
+    await http.delete(uri);
     _productsList.removeWhere((element) => element.id == id);
     notifyListeners();
   }

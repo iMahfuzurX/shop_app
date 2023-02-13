@@ -18,6 +18,10 @@ class ManageProductItem extends StatelessWidget {
     required this.imageUrl,
   }) : super(key: key);
 
+  Future<void> _deleteProduct(BuildContext context) async {
+    await Provider.of<ProductsProvider>(context, listen: false).deleteProduct(id);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -40,10 +44,7 @@ class ManageProductItem extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             IconButton(
-              onPressed: () {
-                Provider.of<ProductsProvider>(context, listen: false)
-                    .deleteProduct(id);
-              },
+              onPressed: () => _deleteProduct(context),
               icon: Icon(Icons.delete),
               color: Theme.of(context).colorScheme.error,
             ),

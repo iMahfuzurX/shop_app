@@ -89,11 +89,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       _isLoading = true;
     });
     if (savedProduct.id.isNotEmpty) {
-      products.updateProduct(savedProduct.id, savedProduct);
-      setState(() {
-        _isLoading = false;
-      });
-      Navigator.of(context).pop();
+      await products.updateProduct(savedProduct.id, savedProduct);
     } else {
       try {
         await products.addProduct(savedProduct);
@@ -110,13 +106,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
             ],
           ),
         );
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.of(context).pop();
       }
     }
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
   }
 
   @override
