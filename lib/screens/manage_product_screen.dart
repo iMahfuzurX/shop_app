@@ -28,19 +28,24 @@ class ManageProductScreen extends StatelessWidget {
         ],
       ),
       drawer: AppDrawer(),
-      body: Padding(
-        padding: EdgeInsets.all(8),
-        child: ListView.builder(
-          itemBuilder: (ctx, i) => Column(
-            children: [
-              ManageProductItem(
-                  id: productsData.productsList[i].id,
-                  title: productsData.productsList[i].title,
-                  imageUrl: productsData.productsList[i].imageUrl),
-              Divider(),
-            ],
+      body: RefreshIndicator(
+        onRefresh: () {
+          return Future.delayed(Duration.zero);
+        },
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: ListView.builder(
+            itemBuilder: (ctx, i) => Column(
+              children: [
+                ManageProductItem(
+                    id: productsData.productsList[i].id,
+                    title: productsData.productsList[i].title,
+                    imageUrl: productsData.productsList[i].imageUrl),
+                Divider(),
+              ],
+            ),
+            itemCount: productsData.productsList.length,
           ),
-          itemCount: productsData.productsList.length,
         ),
       ),
     );

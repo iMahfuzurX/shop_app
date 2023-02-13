@@ -78,7 +78,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     final products = Provider.of<ProductsProvider>(context, listen: false);
     final isValid = _formKey.currentState?.validate();
     if (!(isValid as bool)) {
@@ -95,11 +95,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
       });
       Navigator.of(context).pop();
     } else {
-      products.addProduct(savedProduct).catchError((error) {
-        return showDialog<Null>(
+      try {
+        await products.addProduct(savedProduct);
+      } catch (error) {
+        await showDialog<Null>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: Text('An Error occured'),
+            title: Text('An error occured'),
             content: Text('Something went wrong.'),
             actions: [
               TextButton(
@@ -108,12 +110,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
             ],
           ),
         );
-      }).then((value) {
+      } finally {
         setState(() {
           _isLoading = false;
         });
         Navigator.of(context).pop();
-      });
+      }
     }
   }
 

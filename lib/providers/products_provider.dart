@@ -7,8 +7,8 @@ import 'product_provider.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  final List<Product> _productsList = [
-    Product(
+  List<Product> _productsList = [
+    /* Product(
       id: 'p1',
       title: 'Red Shirt',
       description: 'A red shirt - it is pretty red!',
@@ -39,7 +39,7 @@ class ProductsProvider with ChangeNotifier {
       price: 49.99,
       imageUrl:
           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
+    ),*/
   ];
 
   final List<String> _favIds = [];
@@ -52,18 +52,45 @@ class ProductsProvider with ChangeNotifier {
     return [..._favIds];
   }
 
-  Future<void> addProduct(Product product) {
-    final Uri uri = Uri.https('shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app', 'products.json');
-    return http
-        .post(uri,
-            body: json.encode({
-              'title': product.title,
-              'description': product.description,
-              'price': product.price,
-              'imageUrl': product.imageUrl,
-              'isFavorite': product.isFavorite,
-            }))
-        .then((response) {
+  Future<void> fetchDataFromFirebase() async {
+    final Uri uri = Uri.https(
+        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'products.json');
+    try {
+      final response = await http.get(uri);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final List<Product> loadedProducts = [];
+      extractedData.forEach((prodId, prodData) {
+        loadedProducts.add(
+          Product(
+              id: prodId,
+              title: prodData['title'],
+              description: prodData['description'],
+              price: prodData['price'],
+              imageUrl: prodData['imageUrl'],
+              isFavorite: prodData['isFavorite']),
+        );
+      });
+      _productsList = loadedProducts;
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> addProduct(Product product) async {
+    final Uri uri = Uri.https(
+        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'products.json');
+    try {
+      final response = await http.post(uri,
+          body: json.encode({
+            'title': product.title,
+            'description': product.description,
+            'price': product.price,
+            'imageUrl': product.imageUrl,
+            'isFavorite': product.isFavorite,
+          }));
       final Product newProduct = Product(
           id: json.decode(response.body)['name'],
           title: product.title,
@@ -72,10 +99,10 @@ class ProductsProvider with ChangeNotifier {
           imageUrl: product.imageUrl);
       _productsList.add(newProduct);
       notifyListeners();
-    }).catchError((error) {
+    } catch (error) {
       print('erroroccured ${error.toString()}');
       throw error;
-    });
+    }
   }
 
   void updateProduct(String id, Product product) {
