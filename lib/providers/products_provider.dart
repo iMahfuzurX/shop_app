@@ -8,68 +8,47 @@ import 'product_provider.dart';
 import 'package:http/http.dart' as http;
 
 class ProductsProvider with ChangeNotifier {
-  List<Product> _productsList = [
-    /* Product(
-      id: 'p1',
-      title: 'Red Shirt',
-      description: 'A red shirt - it is pretty red!',
-      price: 29.99,
-      imageUrl:
-          'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    ),
-    Product(
-      id: 'p2',
-      title: 'Trousers',
-      description: 'A nice pair of trousers.',
-      price: 59.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
-    ),
-    Product(
-      id: 'p3',
-      title: 'Yellow Scarf',
-      description: 'Warm and cozy - exactly what you need for the winter.',
-      price: 19.99,
-      imageUrl:
-          'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    ),
-    Product(
-      id: 'p4',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),*/
-  ];
+  List<Product> _productsList = [];
 
   final List<String> _favIds = [];
+
+  final String authToken;
+  final String userId;
+
+  ProductsProvider(this.authToken, this.userId, this._productsList);
 
   List<Product> get productsList {
     return [..._productsList];
   }
 
-  List<String> get favIds {
-    return [..._favIds];
-  }
-
-  Future<void> fetchDataFromFirebase() async {
-    final Uri uri = Uri.https(
-        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
-        'products.json');
+  Future<void> fetchAndSetProducts({bool filterByUser = false}) async {
+    final String filterSegment =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    var uri = Uri.parse(
+        'https://shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken&$filterSegment');
     try {
       final response = await http.get(uri);
-      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final Map<String, dynamic>? extractedData =
+          json.decode(response.body) as Map<String, dynamic>;
+      if (extractedData == null) {
+        return;
+      }
+      uri = Uri.parse(
+          'https://shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app/userFavorites/$userId.json?auth=$authToken');
+      final favoriteResponse = await http.get(uri);
+      final favoriteData = json.decode(favoriteResponse.body);
       final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(
           Product(
-              id: prodId,
-              title: prodData['title'],
-              description: prodData['description'],
-              price: prodData['price'],
-              imageUrl: prodData['imageUrl'],
-              isFavorite: prodData['isFavorite']),
+            id: prodId,
+            title: prodData['title'],
+            description: prodData['description'],
+            price: prodData['price'],
+            imageUrl: prodData['imageUrl'],
+            isFavorite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false,
+          ),
         );
       });
       _productsList = loadedProducts;
@@ -80,9 +59,8 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final Uri uri = Uri.https(
-        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
-        'products.json');
+    final Uri uri = Uri.parse(
+        'https://shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken');
     try {
       final response = await http.post(uri,
           body: json.encode({
@@ -90,7 +68,7 @@ class ProductsProvider with ChangeNotifier {
             'description': product.description,
             'price': product.price,
             'imageUrl': product.imageUrl,
-            'isFavorite': product.isFavorite,
+            'creatorId': userId,
           }));
       final Product newProduct = Product(
           id: json.decode(response.body)['name'],
@@ -110,9 +88,8 @@ class ProductsProvider with ChangeNotifier {
     final i = _productsList.indexWhere((element) => element.id == id);
     if (i >= 0) {
       try {
-        final Uri uri = Uri.https(
-            'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
-            'products/$id.json');
+        final Uri uri = Uri.parse(
+            'https://shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json?auth=$authToken');
         await http.patch(uri,
             body: json.encode({
               'title': newProduct.title,
@@ -129,9 +106,8 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final Uri uri = Uri.https(
-        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
-        'products/$id.json');
+    final Uri uri = Uri.parse(
+        'https://shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json?auth=$authToken');
     final existingProdIndex =
         _productsList.indexWhere((element) => element.id == id);
     Product? existingProduct = _productsList[existingProdIndex];

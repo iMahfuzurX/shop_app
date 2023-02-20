@@ -29,21 +29,17 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleFavorite() async {
+  Future<void> toggleFavorite(String authToken, String userId) async {
     final oldStatus = isFavorite;
     _setFavValue(!isFavorite);
 
-    final Uri uri = Uri.https(
-        'shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app',
-        'products/$id.json');
+    final Uri uri = Uri.parse(
+        'https://shoppeio-default-rtdb.asia-southeast1.firebasedatabase.app/userFavorites/$userId/$id.json?auth=$authToken');
 
     try {
-      final response = await http.patch(uri,
-          body: json.encode({
-            'isFavorite': isFavorite,
-          }));
+      final response = await http.put(uri, body: json.encode(isFavorite));
       if (response.statusCode >= 400) {
-        // failed roll back
+        // failed to update => roll back
         _setFavValue(oldStatus);
         throw HttpException('Cannot save favorite! Failed');
       }

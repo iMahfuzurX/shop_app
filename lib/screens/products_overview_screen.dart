@@ -16,6 +16,7 @@ import 'package:shop_app/widgets/products_grid.dart';
 enum FilterOptions { Favourite, All }
 
 class ProductsOverviewScreen extends StatefulWidget {
+  static const String routeName = '/products-overview';
   const ProductsOverviewScreen({Key? key}) : super(key: key);
 
   @override
@@ -34,7 +35,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         _isLoading = true;
       });
       Provider.of<ProductsProvider>(context, listen: true)
-          .fetchDataFromFirebase()
+          .fetchAndSetProducts()
           .then((value) {
         setState(() {
           _isLoading = false;

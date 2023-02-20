@@ -14,12 +14,12 @@ class ManageProductScreen extends StatelessWidget {
   const ManageProductScreen({Key? key}) : super(key: key);
 
   Future<void> _refreshProducts(BuildContext context) async {
-    await Provider.of<ProductsProvider>(context, listen: false).fetchDataFromFirebase();
+    await Provider.of<ProductsProvider>(context, listen: false)
+        .fetchAndSetProducts(filterByUser: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final productsData = Provider.of<ProductsProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Manage Products'),
@@ -32,23 +32,33 @@ class ManageProductScreen extends StatelessWidget {
         ],
       ),
       drawer: AppDrawer(),
-      body: RefreshIndicator(
-        onRefresh: () => _refreshProducts(context),
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: ListView.builder(
-            itemBuilder: (ctx, i) => Column(
-              children: [
-                ManageProductItem(
-                    id: productsData.productsList[i].id,
-                    title: productsData.productsList[i].title,
-                    imageUrl: productsData.productsList[i].imageUrl),
-                Divider(),
-              ],
-            ),
-            itemCount: productsData.productsList.length,
-          ),
-        ),
+      body: FutureBuilder(
+        future: _refreshProducts(context),
+        builder: (ctx, snapshot) => snapshot.connectionState ==
+                ConnectionState.waiting
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : RefreshIndicator(
+                onRefresh: () => _refreshProducts(context),
+                child: Consumer<ProductsProvider>(
+                  builder: (ctx, productsData, child) => Padding(
+                    padding: EdgeInsets.all(8),
+                    child: ListView.builder(
+                      itemBuilder: (ctx, i) => Column(
+                        children: [
+                          ManageProductItem(
+                              id: productsData.productsList[i].id,
+                              title: productsData.productsList[i].title,
+                              imageUrl: productsData.productsList[i].imageUrl),
+                          Divider(),
+                        ],
+                      ),
+                      itemCount: productsData.productsList.length,
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }

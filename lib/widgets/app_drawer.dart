@@ -2,6 +2,8 @@
 // Created by iMahfuzurX on 1/24/2023.
 //
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/screens/manage_product_screen.dart';
 import 'package:shop_app/screens/orderpage_screen.dart';
 
@@ -24,8 +26,7 @@ class AppDrawer extends StatelessWidget {
             ),
             title: Text('Products'),
             onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed('/');
+              Navigator.of(context).pushReplacementNamed('/');
             },
           ),
           Divider(),
@@ -48,6 +49,17 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(ManageProductScreen.routeName);
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: CircleAvatar(
+              child: Icon(Icons.power_settings_new_rounded),
+            ),
+            title: Text('Logout'),
+            onTap: () {
+              Navigator.of(context).pop();
+              Provider.of<Auth>(context, listen: false).logOut();
             },
           ),
           Divider(),

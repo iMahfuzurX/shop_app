@@ -3,6 +3,7 @@
 //
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/providers/product_provider.dart';
 import 'package:shop_app/screens/products_detail_screen.dart';
@@ -15,6 +16,7 @@ class ProductItem extends StatelessWidget {
     final scaffold = ScaffoldMessenger.of(context);
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<CartProvider>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
     return GridTile(
       footer: GridTileBar(
         backgroundColor: Colors.black87,
@@ -22,7 +24,10 @@ class ProductItem extends StatelessWidget {
             builder: ((context, product, child) => IconButton(
                   onPressed: () async {
                     try {
-                      await product.toggleFavorite();
+                      await product.toggleFavorite(
+                        authData.token as String,
+                        authData.userId as String,
+                      );
                     } catch (error) {
                       scaffold.showSnackBar(
                           SnackBar(content: Text(error.toString())));
