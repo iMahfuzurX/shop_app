@@ -38,37 +38,38 @@ class _OrderItemState extends State<OrderItem> {
                 },
                 icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more)),
           ),
-          if (_expanded)
-            Container(
-              height: min(widget.order.products.length * 40.0, 100),
-              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-              child: ListView(
-                children: widget.order.products
-                    .map((element) => Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  element.title,
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                Text(
-                                  '${element.quantity}x ${element.price} ',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600),
-                                )
-                              ],
-                            ),
-                            Divider()
-                          ],
-                        ))
-                    .toList(),
-              ),
+          // if (_expanded)
+          AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeIn,
+            height:
+                _expanded ? min(widget.order.products.length * 40.0, 100) : 0,
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+            child: ListView(
+              children: widget.order.products
+                  .map((element) => Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                element.title,
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w600),
+                              ),
+                              Text(
+                                '${element.quantity}x ${element.price} ',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w600),
+                              )
+                            ],
+                          ),
+                          Divider()
+                        ],
+                      ))
+                  .toList(),
             ),
+          ),
         ],
       ),
     );

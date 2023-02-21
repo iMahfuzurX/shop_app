@@ -63,9 +63,16 @@ class ProductItem extends StatelessWidget {
             onTap: () => Navigator.of(context).pushNamed(
                 ProductsDetailScreen.routeName,
                 arguments: product.id),
-            child: Image.network(
-              product.imageUrl,
-              fit: BoxFit.cover,
+            child: Hero(
+              tag: product.id,
+              child: FadeInImage(
+                placeholder:
+                    AssetImage('assets/images/product_placeholder.png'),
+                image: NetworkImage(
+                  product.imageUrl,
+                ),
+                fit: BoxFit.cover,
+              ),
             ),
           )),
     );

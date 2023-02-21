@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/helpers/custom_route.dart';
 import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/providers/orders.dart';
@@ -30,9 +31,10 @@ class MyApp extends StatelessWidget {
             [],
           ),
           update: (ctx, auth, previousProducts) => ProductsProvider(
-              auth.token ?? '',
-              auth.userId ?? '',
-              previousProducts == null ? [] : previousProducts.productsList),
+            auth.token ?? '',
+            auth.userId ?? '',
+            previousProducts == null ? [] : previousProducts.productsList,
+          ),
         ),
         ChangeNotifierProvider(create: (ctx) => CartProvider()),
         ChangeNotifierProxyProvider<Auth, Orders>(
@@ -50,7 +52,11 @@ class MyApp extends StatelessWidget {
       ],
       child: Consumer<Auth>(
         builder: (ctx, auth, child) => MaterialApp(
-          theme: ThemeData(),
+          theme: ThemeData(
+              pageTransitionsTheme: PageTransitionsTheme(builders: {
+            TargetPlatform.android: CustomPageTransitionBuilder(),
+            TargetPlatform.iOS: CustomPageTransitionBuilder()
+          })),
           debugShowCheckedModeBanner: false,
           // initialRoute: AuthScreen.routeName,
           home: auth.isAuth

@@ -91,12 +91,49 @@ class AuthCard extends StatefulWidget {
   State<AuthCard> createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends State<AuthCard>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   AuthMode _authMode = AuthMode.Login;
   final Map<String, String?> _authData = {'email': null, 'password': null};
   final _passwordController = TextEditingController();
   var _isLoading = false;
+
+  late AnimationController _animationController;
+  late Animation<Size> _heightAnimation;
+  late Animation<double> _fadeAnimation;
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    /*_heightAnimation = Tween<Size>(
+      begin: Size(double.infinity, 320),
+      end: Size(double.infinity, 400),
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.linear,
+      ),
+    );*/
+    _fadeAnimation = Tween(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+    // _heightAnimation.addListener(() => setState(() {}));
+/*    _slideController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));*/
+    _slideAnimation = Tween<Offset>(begin: Offset(0, -1.5), end: Offset(0, 0))
+        .animate(CurvedAnimation(
+            parent: _animationController, curve: Curves.easeIn));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -159,10 +196,12 @@ class _AuthCardState extends State<AuthCard> {
       setState(() {
         _authMode = AuthMode.Signup;
       });
+      _animationController.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
+      _animationController.reverse();
     }
   }
 
@@ -174,8 +213,13 @@ class _AuthCardState extends State<AuthCard> {
         borderRadius: BorderRadius.circular(10),
       ),
       elevation: 8,
-      child: Container(
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeIn,
         height: _authMode == AuthMode.Signup ? deviceSize.height * 0.5 : 320,
+        // constraints: BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 60 :0, maxHeight: _authMode == AuthMode.Signup ? 160 :0),
+        // height: _authMode == AuthMode.Signup ? 400 : 320,
+        // height: _heightAnimation.value.height,
         constraints:
             BoxConstraints(minHeight: _authMode == AuthMode.Login ? 260 : 320),
         width: deviceSize.width * 0.75,
@@ -212,22 +256,36 @@ class _AuthCardState extends State<AuthCard> {
                     _authData['password'] = value;
                   },
                 ),
-                if (_authMode == AuthMode.Signup)
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    enabled: _authMode == AuthMode.Signup,
-                    validator: (_authMode == AuthMode.Signup)
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords does not match.';
-                            }
-                          }
-                        : null,
-                    // onSaved: (value) {
-                    //   _authData['password'] = value;
-                    // },
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  constraints: BoxConstraints(
+                    minHeight: _authMode == AuthMode.Signup ? 60 : 0,
+                    maxHeight: _authMode == AuthMode.Signup ? 120 : 0,
                   ),
+                  curve: Curves.easeIn,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: TextFormField(
+                        decoration:
+                            InputDecoration(labelText: 'Confirm Password'),
+                        obscureText: true,
+                        enabled: _authMode == AuthMode.Signup,
+                        validator: (_authMode == AuthMode.Signup)
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords does not match.';
+                                }
+                              }
+                            : null,
+                        // onSaved: (value) {
+                        //   _authData['password'] = value;
+                        // },
+                      ),
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
